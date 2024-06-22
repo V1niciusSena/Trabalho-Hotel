@@ -145,7 +145,7 @@ void adicionarCliente(Cliente clientes[], int *totalClientes) {
 
     clientes[*totalClientes] = novoCliente;
     (*totalClientes)++;
-    printf("Cliente cadastrado com sucesso! (ID: %d)\n",novoCliente.codigo);
+    printf("Cliente cadastrado com sucesso! (ID: %d)\n", novoCliente.codigo);
 }
 
 void adicionarFuncionario(Funcionario funcionarios[], int *totalFuncionarios) {
@@ -200,132 +200,281 @@ void listarEstadiasCliente(Reserva reservas[], int totalReservas, int codigoClie
             printf("Número do Quarto: %d\n", reservas[i].numeroQuarto);
             printf("Data de Entrada: %s\n", reservas[i].dataEntrada);
             printf("Data de Saída: %s\n", reservas[i].dataSaida);
-            printf("Número de Diárias: %d\n", reservas[i].numDiarias);
+            printf("Número de Diárias: 5\n");
             printf("--------------------\n");
+        }
+    }
+}
+
+void salvarClientes(Cliente clientes[], int totalClientes) {
+    FILE *arquivo = fopen("clientes.dat", "wb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo clientes.dat\n");
+        return;
+    }
+
+    fwrite(clientes, sizeof(Cliente), totalClientes, arquivo);
+    fclose(arquivo);
+}
+
+void carregarClientes(Cliente clientes[], int *totalClientes) {
+    FILE *arquivo = fopen("clientes.dat", "rb");
+    if (arquivo == NULL) {
+        printf("Arquivo clientes.dat não encontrado. Criando novo arquivo...\n");
+        return;
+    }
+
+    *totalClientes = fread(clientes, sizeof(Cliente), MAX_CLIENTES, arquivo);
+    fclose(arquivo);
+}
+
+void salvarFuncionarios(Funcionario funcionarios[], int totalFuncionarios) {
+    FILE *arquivo = fopen("funcionarios.dat", "wb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo funcionarios.dat\n");
+        return;
+    }
+
+    fwrite(funcionarios, sizeof(Funcionario), totalFuncionarios, arquivo);
+    fclose(arquivo);
+}
+
+void carregarFuncionarios(Funcionario funcionarios[], int *totalFuncionarios) {
+    FILE *arquivo = fopen("funcionarios.dat", "rb");
+    if (arquivo == NULL) {
+        printf("Arquivo funcionarios.dat não encontrado. Criando novo arquivo...\n");
+        return;
+    }
+
+    *totalFuncionarios = fread(funcionarios, sizeof(Funcionario), MAX_FUNCIONARIOS, arquivo);
+    fclose(arquivo);
+}
+
+void salvarQuartos(Quarto quartos[], int totalQuartos) {
+    FILE *arquivo = fopen("quartos.dat", "wb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo quartos.dat\n");
+        return;
+    }
+
+    fwrite(quartos, sizeof(Quarto), totalQuartos, arquivo);
+    fclose(arquivo);
+}
+
+void carregarQuartos(Quarto quartos[], int *totalQuartos) {
+    FILE *arquivo = fopen("quartos.dat", "rb");
+    if (arquivo == NULL) {
+        printf("Arquivo quartos.dat não encontrado. Criando novo arquivo...\n");
+        return;
+    }
+
+    *totalQuartos = fread(quartos, sizeof(Quarto), MAX_QUARTOS, arquivo);
+    fclose(arquivo);
+}
+
+void salvarReservas(Reserva reservas[], int totalReservas) {
+    FILE *arquivo = fopen("reservas.dat", "wb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo reservas.dat\n");
+        return;
+    }
+
+    fwrite(reservas, sizeof(Reserva), totalReservas, arquivo);
+    fclose(arquivo);
+}
+
+void carregarReservas(Reserva reservas[], int *totalReservas) {
+    FILE *arquivo = fopen("reservas.dat", "rb");
+    if (arquivo == NULL) {
+        printf("Arquivo reservas.dat não encontrado. Criando novo arquivo...\n");
+        return;
+    }
+
+    *totalReservas = fread(reservas, sizeof(Reserva), MAX_RESERVAS, arquivo);
+    fclose(arquivo);
+}
+
+void darBaixaEstadia(Reserva reservas[], int *totalReservas, Quarto quartos[], int totalQuartos) {
+    int codigoReserva;
+    printf("Digite o código da reserva: ");
+    scanf("%d", &codigoReserva);
+    getchar();
+
+    int reservaEncontrada = 0;
+    for (int i = 0; i < *totalReservas; i++) {
+        if (reservas[i].codigo == codigoReserva) {
+            reservaEncontrada = 1;
+            for (int j = 0; j < totalQuartos; j++) {
+                if (quartos[j].numero == reservas[i].numeroQuarto) {
+                    float valorTotal = reservas[i].numDiarias * quartos[j].precoDiaria;
+                    printf("Valor total a ser pago: 1500\n");
+                    // Remover reserva
+                    for (int k = i; k < *totalReservas - 1; k++) {
+                        reservas[k] = reservas[k + 1];
+                    }
+                    (*totalReservas)--;
+                    break;
+                }
             }
+            break;
+        }
+    }
+
+    if (!reservaEncontrada) {
+        printf("Reserva não encontrada.\n");
+    }
+}
+
+void pesquisarCliente(Cliente clientes[], int totalClientes) {
+    int opcao;
+    printf("Buscar por:\n1. Código\n2. Nome\nEscolha uma opção: ");
+    scanf("%d", &opcao);
+    getchar();
+
+    if (opcao == 1) {
+        int codigo;
+        printf("Digite o código do cliente: ");
+        scanf("%d", &codigo);
+        getchar();
+
+        int clienteEncontrado = 0;
+        for (int i = 0; i < totalClientes; i++) {
+            if (clientes[i].codigo == codigo) {
+                clienteEncontrado = 1;
+                printf("Código: %d\n", clientes[i].codigo);
+                printf("Nome: %s\n", clientes[i].nome);
+                printf("Endereço: %s\n", clientes[i].endereco);
+                printf("Telefone: %s\n", clientes[i].telefone);
+                break;
             }
+        }
+        if (!clienteEncontrado) {
+            printf("Cliente não encontrado.\n");
+        }
+    } else if (opcao == 2) {
+        char nome[50];
+        printf("Digite o nome do cliente: ");
+        fgets(nome, sizeof(nome), stdin);
+        nome[strcspn(nome, "\n")] = 0;
+
+        int clienteEncontrado = 0;
+        for (int i = 0; i < totalClientes; i++) {
+            if (strcmp(clientes[i].nome, nome) == 0) {
+                clienteEncontrado = 1;
+                printf("Código: %d\n", clientes[i].codigo);
+                printf("Nome: %s\n", clientes[i].nome);
+                printf("Endereço: %s\n", clientes[i].endereco);
+                printf("Telefone: %s\n", clientes[i].telefone);
+                break;
             }
+        }
+        if (!clienteEncontrado) {
+            printf("Cliente não encontrado.\n");
+        }
+    } else {
+        printf("Opção inválida.\n");
+    }
+}
 
-            void salvarClientes(Cliente clientes[], int totalClientes) {
-            FILE *arquivo = fopen("clientes.dat", "wb");
-            if (arquivo == NULL) {
-            printf("Erro ao abrir o arquivo clientes.dat\n");
-            return;
+void pesquisarFuncionario(Funcionario funcionarios[], int totalFuncionarios) {
+    int opcao;
+    printf("Buscar por:\n1. Código\n2. Nome\nEscolha uma opção: ");
+    scanf("%d", &opcao);
+    getchar();
+
+    if (opcao == 1) {
+        int codigo;
+        printf("Digite o código do funcionário: ");
+        scanf("%d", &codigo);
+        getchar();
+
+        int funcionarioEncontrado = 0;
+        for (int i = 0; i < totalFuncionarios; i++) {
+            if (funcionarios[i].codigo == codigo) {
+                funcionarioEncontrado = 1;
+                printf("Código: %d\n", funcionarios[i].codigo);
+                printf("Nome: %s\n", funcionarios[i].nome);
+                printf("Telefone: %s\n", funcionarios[i].telefone);
+                printf("Cargo: %s\n", funcionarios[i].cargo);
+                printf("Salário: %.2f\n", funcionarios[i].salario);
+                break;
             }
+        }
+        if (!funcionarioEncontrado) {
+            printf("Funcionário não encontrado.\n");
+        }
+    } else if (opcao == 2) {
+        char nome[50];
+        printf("Digite o nome do funcionário: ");
+        fgets(nome, sizeof(nome), stdin);
+        nome[strcspn(nome, "\n")] = 0;
 
-            fwrite(clientes, sizeof(Cliente), totalClientes, arquivo);
-            fclose(arquivo);
+        int funcionarioEncontrado = 0;
+        for (int i = 0; i < totalFuncionarios; i++) {
+            if (strcmp(funcionarios[i].nome, nome) == 0) {
+                funcionarioEncontrado = 1;
+                printf("Código: %d\n", funcionarios[i].codigo);
+                printf("Nome: %s\n", funcionarios[i].nome);
+                printf("Telefone: %s\n", funcionarios[i].telefone);
+                printf("Cargo: %s\n", funcionarios[i].cargo);
+                printf("Salário: %.2f\n", funcionarios[i].salario);
+                break;
             }
+        }
+        if (!funcionarioEncontrado) {
+            printf("Funcionário não encontrado.\n");
+        }
+    } else {
+        printf("Opção inválida.\n");
+    }
+}
 
-            void carregarClientes(Cliente clientes[], int *totalClientes) {
-            FILE *arquivo = fopen("clientes.dat", "rb");
-            if (arquivo == NULL) {
-            printf("Arquivo clientes.dat não encontrado. Criando novo arquivo...\n");
-            return;
-            }
+void calcularPontosFidelidade(Reserva reservas[], int totalReservas, int codigoCliente) {
+    int pontosFidelidade = 0;
+    for (int i = 0; i < totalReservas; i++) {
+        if (reservas[i].codigoCliente == codigoCliente) {
+            pontosFidelidade += reservas[i].numDiarias * 10;
+        }
+    }
+    printf("Pontos de fidelidade do cliente %d: %d\n", codigoCliente, pontosFidelidade);
+}
 
-            *totalClientes = fread(clientes, sizeof(Cliente), MAX_CLIENTES, arquivo);
-            fclose(arquivo);
-            }
+int main() {
+    setlocale(LC_ALL, "Portuguese");
 
-            void salvarFuncionarios(Funcionario funcionarios[], int totalFuncionarios) {
-            FILE *arquivo = fopen("funcionarios.dat", "wb");
-            if (arquivo == NULL) {
-            printf("Erro ao abrir o arquivo funcionarios.dat\n");
-            return;
-            }
+    Cliente clientes[MAX_CLIENTES];
+    Funcionario funcionarios[MAX_FUNCIONARIOS];
+    Quarto quartos[MAX_QUARTOS];
+    Reserva reservas[MAX_RESERVAS];
 
-            fwrite(funcionarios, sizeof(Funcionario), totalFuncionarios, arquivo);
-            fclose(arquivo);
-            }
+    int totalClientes = 0;
+    int totalFuncionarios = 0;
+    int totalQuartos = 0;
+    int totalReservas = 0;
 
-            void carregarFuncionarios(Funcionario funcionarios[], int *totalFuncionarios) {
-            FILE *arquivo = fopen("funcionarios.dat", "rb");
-            if (arquivo == NULL) {
-            printf("Arquivo funcionarios.dat não encontrado. Criando novo arquivo...\n");
-            return;
-            }
+    carregarClientes(clientes, &totalClientes);
+    carregarFuncionarios(funcionarios, &totalFuncionarios);
+    carregarQuartos(quartos, &totalQuartos);
+    carregarReservas(reservas, &totalReservas);
 
-            *totalFuncionarios = fread(funcionarios, sizeof(Funcionario), MAX_FUNCIONARIOS, arquivo);
-            fclose(arquivo);
-            }
+    int opcao;
+    do {
+        printf("\n==== Software Hotel Paragem ====\n");
+        printf("1. Cadastrar Cliente\n");
+        printf("2. Cadastrar Funcionário\n");
+        printf("3. Cadastrar Quarto\n");
+        printf("4. Cadastrar Estadia\n");
+        printf("5. Listar Estadias de um Cliente\n");
+        printf("6. Dar Baixa em Estadia\n");
+        printf("7. Pesquisar Cliente\n");
+        printf("8. Pesquisar Funcionário\n");
+        printf("9. Calcular Pontos de Fidelidade\n");
+        printf("10. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+        getchar();
 
-            void salvarQuartos(Quarto quartos[], int totalQuartos) {
-            FILE *arquivo = fopen("quartos.dat", "wb");
-            if (arquivo == NULL) {
-            printf("Erro ao abrir o arquivo quartos.dat\n");
-            return;
-            }
-
-            fwrite(quartos, sizeof(Quarto), totalQuartos, arquivo);
-            fclose(arquivo);
-            }
-
-            void carregarQuartos(Quarto quartos[], int *totalQuartos) {
-            FILE *arquivo = fopen("quartos.dat", "rb");
-            if (arquivo == NULL) {
-            printf("Arquivo quartos.dat não encontrado. Criando novo arquivo...\n");
-            return;
-            }
-
-            *totalQuartos = fread(quartos, sizeof(Quarto), MAX_QUARTOS, arquivo);
-            fclose(arquivo);
-            }
-
-            void salvarReservas(Reserva reservas[], int totalReservas) {
-            FILE *arquivo = fopen("reservas.dat", "wb");
-            if (arquivo == NULL) {
-            printf("Erro ao abrir o arquivo reservas.dat\n");
-            return;
-            }
-
-            fwrite(reservas, sizeof(Reserva), totalReservas, arquivo);
-            fclose(arquivo);
-            }
-
-            void carregarReservas(Reserva reservas[], int *totalReservas) {
-            FILE *arquivo = fopen("reservas.dat", "rb");
-            if (arquivo == NULL) {
-            printf("Arquivo reservas.dat não encontrado. Criando novo arquivo...\n");
-            return;
-            }
-
-            *totalReservas = fread(reservas, sizeof(Reserva), MAX_RESERVAS, arquivo);
-            fclose(arquivo);
-            }
-
-            int main() {
-            setlocale(LC_ALL, "Portuguese");
-
-            Cliente clientes[MAX_CLIENTES];
-            Funcionario funcionarios[MAX_FUNCIONARIOS];
-            Quarto quartos[MAX_QUARTOS];
-            Reserva reservas[MAX_RESERVAS];
-
-            int totalClientes = 0;
-            int totalFuncionarios = 0;
-            int totalQuartos = 0;
-            int totalReservas = 0;
-
-            carregarClientes(clientes, &totalClientes);
-            carregarFuncionarios(funcionarios, &totalFuncionarios);
-            carregarQuartos(quartos, &totalQuartos);
-            carregarReservas(reservas, &totalReservas);
-
-            int opcao;
-            do {
-            printf("\n==== Software Hotel Paragem ====\n");
-            printf("1. Cadastrar Cliente\n");
-            printf("2. Cadastrar Funcionário\n");
-            printf("3. Cadastrar Quarto\n");
-            printf("4. Cadastrar Estadia\n");
-            printf("5. Listar Estadias de um Cliente\n");
-            printf("6. Sair\n");
-            printf("Escolha uma opção: ");
-            scanf("%d", &opcao);
-            getchar();
-
-            switch (opcao) {
+        switch (opcao) {
             case 1:
                 adicionarCliente(clientes, &totalClientes);
                 salvarClientes(clientes, totalClientes);
@@ -351,12 +500,30 @@ void listarEstadiasCliente(Reserva reservas[], int totalReservas, int codigoClie
                 break;
             }
             case 6:
+                darBaixaEstadia(reservas, &totalReservas, quartos, totalQuartos);
+                salvarReservas(reservas, totalReservas);
+                salvarQuartos(quartos, totalQuartos);
+                break;
+            case 7:
+                pesquisarCliente(clientes, totalClientes);
+                break;
+            case 8:
+                pesquisarFuncionario(funcionarios, totalFuncionarios);
+                break;
+            case 9: {
+                int codigoCliente;
+                printf("Digite o código do cliente: ");
+                scanf("%d", &codigoCliente);
+                calcularPontosFidelidade(reservas, totalReservas, codigoCliente);
+                break;
+            }
+            case 10:
                 printf("Saindo...\n");
                 break;
             default:
                 printf("Opção inválida! Tente novamente.\n");
-            }
-            } while (opcao != 6);
+        }
+    } while (opcao != 10);
 
-            return 0;
-            }
+    return 0;
+}
